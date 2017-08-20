@@ -1,3 +1,3 @@
 # YouTubeAPIprogram
-Small youtube api program working with maven and youtube's api to make requests
-and gather some more pertinent information about the user.
+Small YouTube API program working with maven and YouTube's API to make requests
+and gather some more pertinent information about user content.
