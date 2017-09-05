@@ -50,6 +50,7 @@ public class Search {
     private static ArrayList<Video> videoList = new ArrayList<Video>();
     private static Video currentVideo;
     private static int videosSearched = 0;
+    private static Connector connection;
     
     public Search() {
     }
@@ -118,6 +119,7 @@ public class Search {
             if (searchResultList != null) {
                 prettyPrint(searchResultList.iterator(), queryTerm, videosToFind);
             }
+            Connector.toGUI(videoList);
         } catch (GoogleJsonResponseException ex) {
             FetchPanel.getGenArea().append("There was a service error: " + ex.getDetails().getCode() + " : "
                     + ex.getDetails().getMessage());
@@ -166,9 +168,7 @@ public class Search {
                    	FetchPanel.getGenArea().append("\n Video: " + ProjectHandler.getYouTubeURLdef() + rId.getVideoId());
                    	FetchPanel.getGenArea().append("\n Title: " + singleVideo.getSnippet().getTitle());
                    	FetchPanel.getGenArea().append("\n Views: " + MetaData.getViews(URLReader.getUrlSource(ProjectHandler.getYouTubeURLdef() + rId.getVideoId())));
-                   	FetchPanel.getGenArea().append("\n Likes: " + MetaData.getLikes(URLReader.getUrlSource(ProjectHandler.getYouTubeURLdef() + rId.getVideoId()))
-                   	//MetaData.getLikeRatio(theVideo, isLikeRatio)
-                   			);
+                   	FetchPanel.getGenArea().append("\n Likes: " + MetaData.getLikes(URLReader.getUrlSource(ProjectHandler.getYouTubeURLdef() + rId.getVideoId())));
                    	FetchPanel.getGenArea().append("\n Dislikes: " + MetaData.getDislikes(URLReader.getUrlSource(ProjectHandler.getYouTubeURLdef() + rId.getVideoId())));
                    	FetchPanel.getGenArea().append("\n Channel: " + MetaData.getChannel(URLReader.getUrlSource(ProjectHandler.getYouTubeURLdef() + rId.getVideoId())));
                    	
@@ -208,7 +208,6 @@ public class Search {
 				}
             }
         }
-        	updateGUI(videoList);
     }
     public static ArrayList<Video> getVideoList() {
     	return videoList;
@@ -216,157 +215,4 @@ public class Search {
     public static int getVideoAmount() {
     	return videosSearched;
     }
-	private static void updateGUI(ArrayList<Video> listOfVideos) {
-		SortPanel.getTextArea().append("\n" + ProjectHandler.getGreatestDivide());
-		getTopVideoContents(listOfVideos);
-		SortPanel.getTextArea().append("\n" + ProjectHandler.getGreaterDivide());
-		getMostDislikedVideo(listOfVideos);
-		SortPanel.getTextArea().append("\n" + ProjectHandler.getGreaterDivide());
-		getMostLikedVideo(listOfVideos);
-		SortPanel.getTextArea().append("\n" + ProjectHandler.getLesserDivide());
-		getMostViewedVideo(listOfVideos);
-		SortPanel.getTextArea().append("\n" + ProjectHandler.getLesserDivide());
-		getMostFrequantChannel(listOfVideos);
-		SortPanel.getTextArea().append("\n" + ProjectHandler.getLesserDivide());
-	}
-	
-	/**
-	 *  displays information of the first video found
-	 * @param listOfVideos videos in the query
-	 */
-	private static void getTopVideoContents(ArrayList<Video> listOfVideos) {
-		SortPanel.getTextArea().append("\n First video found: " + "\"" + listOfVideos.get(0).getTitle());
-		SortPanel.getTextArea().append("\n Video author: " + listOfVideos.get(0).getChannel() + " (Subs:)" + listOfVideos.get(0).getChannelSubs());
-		SortPanel.getTextArea().append("\n Video likes: " + listOfVideos.get(0).getLikes());
-		SortPanel.getTextArea().append("\n Video dislikes: " + listOfVideos.get(0).getDislikes());
-		SortPanel.getTextArea().append("\n Video views: " + listOfVideos.get(0).getViews());
-		SortPanel.getTextArea().append("\n Video Tags: " + listOfVideos.get(0).getTags());
-	}
-	/**
-	 *  Prints out the most liked video with priority to the first highests liked video
-	 * @param listOfVideos videos that have been searched
-	 */
-	private static void getMostLikedVideo(ArrayList<Video> listOfVideos) {
-		int likeResult = 0;
-		int likeIndex = 0;
-		int mostLiked = 0;
-		for (int count = 0; count < listOfVideos.size(); count ++) {
-			try {
-				while (listOfVideos.get(count).getLikes().replaceAll(",", "").replaceAll(" ", "").equals("No") ||
-						listOfVideos.get(count).getLikes().replaceAll(",", "").replaceAll(" ", "").equals("")) {
-					count++;
-				}
-				if(MetaData.getLikeRatio(listOfVideos.get(count), true) > mostLiked) {
-					mostLiked = MetaData.getLikeRatio(listOfVideos.get(count), true);
-					likeResult = Integer.valueOf(listOfVideos.get(count).getLikes().replaceAll("[^0-9]", ""));
-					likeIndex = count;
-				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-		System.out.println("DONE WITH LIKES");
-		SortPanel.getTextArea().append("\n Most liked video: " + listOfVideos.get(likeIndex).getTitle());
-		SortPanel.getTextArea().append("\n Rough precentage of likes: " + String.valueOf(mostLiked) + "%" );
-		SortPanel.getTextArea().append("\n Amount of likes: " + likeResult);
-		SortPanel.getTextArea().append("\n Amount of views: " + listOfVideos.get(likeIndex).getViews());
-		SortPanel.getTextArea().append("\n  Video Tags: " + listOfVideos.get(likeIndex).getTags());
-	}
-	/**
-	 * prints out the most disliked videos with priority with the ;east liked videos
-	 * @param listOfVideosvideos tht have been found in the query
-	 */
-	private static void getMostDislikedVideo(ArrayList<Video> listOfVideos) {
-		int dislikeResult = 0;
-		int dislikeIndex = 0;
-		int mostDisliked = 0;
-		for (int count = 0; count < listOfVideos.size(); count ++) {
-			try {
-				while (listOfVideos.get(count).getDislikes().replaceAll(",", "").replaceAll(" ", "").equals("No") ||
-						listOfVideos.get(count).getDislikes().replaceAll(",", "").replaceAll(" ", "").equals("")) {
-					count++;
-				}
-				if(MetaData.getLikeRatio(listOfVideos.get(count), false) > mostDisliked) {
-					mostDisliked = MetaData.getLikeRatio(listOfVideos.get(count), false);
-					dislikeResult = Integer.valueOf(listOfVideos.get(count).getDislikes().replaceAll("[^0-9]", ""));
-					dislikeIndex = count;
-				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-		System.out.println("DONE WITH DISLIKES");
-		SortPanel.getTextArea().append("\n Most hated video: " + listOfVideos.get(dislikeIndex).getTitle());
-		SortPanel.getTextArea().append("\n Rough precentage of dislikes: " + String.valueOf(mostDisliked) +  "%");
-		SortPanel.getTextArea().append("\n Amount of dislikes: " + dislikeResult);
-		SortPanel.getTextArea().append("\n Amount of views: " + listOfVideos.get(dislikeIndex).getViews());
-		SortPanel.getTextArea().append("\n  Video Tags: " + listOfVideos.get(dislikeIndex).getTags());
-	}
-	/**
-	 *  prints out the most viewed video with priority to the first
-	 * @param listOfVideos videos found within the search
-	 */
-	private static void getMostViewedVideo(ArrayList<Video> listOfVideos) {
-		int views = 0;
-		int index =  0;
-		for (int count = 0; count < listOfVideos.size(); count ++) {
-			try {
-
-				if (Integer.valueOf(listOfVideos.get(count).getViews().replaceAll(",", "").replaceAll(" ", "")) > views) {
-					views = Integer.valueOf(listOfVideos.get(count).getViews().replaceAll(",", "").replaceAll(" ", ""));
-					index = count;
-				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-		System.out.println("DONE WITH VIEWS");
-		SortPanel.getTextArea().append("\n Video with most views " + listOfVideos.get(index).getTitle());
-		SortPanel.getTextArea().append("\n Amount of views: " +listOfVideos.get(index).getViews());
-		SortPanel.getTextArea().append("\n Amount of dislikes: " +listOfVideos.get(index).getLikes());
-		SortPanel.getTextArea().append("\n Amount of likes: " + listOfVideos.get(index).getDislikes());
-		SortPanel.getTextArea().append("\n Tags: " +listOfVideos.get(index).getTags());
-		
-	}
-	
-	/**
-	 *  Determine the frequency of a youtube channel
-	 * @param listOfVideos
-	 */
-	private static void getMostFrequantChannel(ArrayList<Video> listOfVideos) {
-		try {
-			HashMap <String,Integer> map = new HashMap<String, Integer>();
-			StringBuilder string = new StringBuilder();
-			int maxValue = Integer.MIN_VALUE;
-			int temp = 0;
-			for (int index = 0; index < listOfVideos.size(); index++) {
-				if (map.containsKey(listOfVideos.get(index).getChannel())) {
-					temp = map.get(listOfVideos.get(index).getChannel()) + 1;
-					map.put(listOfVideos.get(index).getChannel(), temp);
-					System.out.println("Value for " + listOfVideos.get(index).getChannel() + " Incremented to " + temp);
-					System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
-					//map.
-				} else {
-					map.put(listOfVideos.get(index).getChannel(), 1);
-					System.out.println(listOfVideos.get(index).getChannel() + " Was added to the map");
-					System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
-				}
-				temp = 1;
-			}
-			for (Entry<String,Integer> entry : map.entrySet()) {
-				if (maxValue < entry.getValue() ) {
-					if (string.length() > 1) {
-						string.delete(0, string.length());
-					}
-					maxValue = entry.getValue();
-					string.append(entry.getKey());
-				}
-			}
-			
-			System.out.println("The most frequent channel is " + string.toString() + " appearing " + maxValue + " times.");
-			SortPanel.getTextArea().append("\n The most frequent channel is " + string.toString() + " appearing " + maxValue + " times.");
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
 }
