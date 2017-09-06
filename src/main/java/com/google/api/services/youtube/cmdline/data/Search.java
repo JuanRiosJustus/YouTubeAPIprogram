@@ -25,7 +25,6 @@ import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Thumbnail;
 
 import crawl.gui.FetchPanel;
-import crawl.gui.SortPanel;
 import crawl.objects.Video;
 import crawl.url.MetaData;
 import crawl.url.ProjectHandler;
@@ -35,10 +34,8 @@ import crawl.url.URLReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 public class Search {
 
@@ -50,11 +47,7 @@ public class Search {
     private static ArrayList<Video> videoList = new ArrayList<Video>();
     private static Video currentVideo;
     private static int videosSearched = 0;
-    private static Connector connection;
     
-    public Search() {
-    }
-
     /**
      * Define a global instance of a Youtube object, which will be used
      * to make YouTube Data API requests.
